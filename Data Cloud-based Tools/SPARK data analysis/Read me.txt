@@ -1,0 +1,64 @@
+- Spark Data Analysis Project
+This project analyzes global land temperature data using Apache Spark. Follow the instructions below to set up and run the project.
+
+- Project Structure
+GlobalLandTemperaturesByCountry.csv: The dataset containing temperature data.
+Spark data analysis.pptx: A PowerPoint presentation summarizing the analysis results.
+SPARK.py: The main Python script for performing data analysis using Apache Spark.
+
+- Prerequisites
+Ensure you have the following installed on your system:
+
+Apache Spark (version 3.0.0 or later)
+Python (version 3.6 or later)
+Java (version 8 or later)
+Necessary Python libraries:
+pyspark
+pandas
+
+- Setup Instructions
+
+1) Install Apache Spark: Follow the official Apache Spark website instructions to download and install Spark.
+
+2) Install Required Python Libraries:
+Open a terminal and run the following commands to install the necessary Python libraries:
+
+ pip install pyspark pandas
+
+3) Set Up Environment Variables:
+Ensure the environment variables "SPARK_HOME" and "JAVA_HOME" are set correctly. Add the following lines to your 
+".bashrc", ".zshrc", or equivalent configuration file:
+
+ export SPARK_HOME=/path/to/spark
+ export JAVA_HOME=/path/to/java
+ export PATH=$SPARK_HOME/bin:$JAVA_HOME/bin:$PATH
+
+Replace "/path/to/spark" and "/path/to/java" with the actual installation paths on your system.
+
+4) Running the Spark Program:
+Navigate to the project directory containing "SPARK.py" and run the script using Python:
+
+ cd /path/to/SPARK_project/SPARK\ project
+ python SPARK.py
+
+- Script Overview
+The "SPARK.py" script performs the following tasks:
+
+Load Data: reads the CSV dataset into a Spark DataFrame.
+Data Cleaning: Cleans the dataset by handling missing values and removing unnecessary columns.
+Data Analysis: Performs various analyses such as calculating average temperatures, identifying trends, and visualizing results.
+
+
+
+- ADDITIONAL INFORMATION
+
+Ensure to have adequate memory and CPU resources to run the Spark job efficiently.
+For detailed analysis and results, refer to the ppt file.
+
+
+
+
+
+
+
+
