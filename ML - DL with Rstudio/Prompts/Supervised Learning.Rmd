@@ -1,0 +1,285 @@
+---
+title: "Supervised Learning"
+output: html_notebook
+---
+
+```{r}
+# install package if needed 
+# install.packages('dplyr')
+# install.packages('caret')
+# install.packages('ggplot2')
+# install.packages('pROC')
+# install.packages('kernlab') # a library for SVM
+# install.packages('e1071') # a library for SVM
+# install.packages('adabag') # a library for bagged adaboost
+# install.packages('caTools') # a library for boosted logistic regression
+# install.packages('mboost') # a library for boosted logistic regression
+# install.packages('gbm') # a library for stochastic gradient boosting
+# install.packages('LiblineaR') # a library for regularized logistic regression
+
+# see https://topepo.github.io/caret/available-models.html for available models in caret. These models require new libraries installed and they may depend on your version of R and may take a long time to run depending on your computer.  
+
+# see https://topepo.github.io/caret/train-models-by-tag.html for extra packages needed for each model in caret. 
+
+```
+
+```{r}
+# Import libraries
+library(dplyr)
+library(caret)
+library(ggplot2)
+library(pROC)
+library(kernlab)
+library(e1071)
+library(caTools)
+library(mboost)
+library(gbm)
+library(LiblineaR)
+
+```
+
+```{r}
+# Import Data
+
+df <- read.csv('credit_card2.csv') 
+df
+
+# Data processing 
+
+df$card <- factor(df$card) # convert 
+levels(df$card)
+
+df$card <- relevel(df$card, ref = 'yes')
+levels(df$card)
+
+
+```
+
+```{r}
+# Decision Tree
+
+set.seed(100)
+
+train <- createDataPartition(y = df$card, p= 0.7, list = FALSE)
+
+# train
+
+training <- df[train,]
+
+testing <- df[-train,]
+
+
+dt <- train(card ~ age + income + expenditure + months + active, data = training, method = 'rpart', parms = list(split = 'information'))
+dt
+
+test_pred <- predict(dt, newdata = testing)
+confusionMatrix(test_pred, as.factor(testing$card), mode = 'everything')
+
+testing %>% group_by(card) %>% count()
+
+test_pred_prob <- predict(dt, newdata = testing, type = 'prob')
+
+dt_roc <- roc(testing$card, test_pred_prob$yes)
+
+dt_roc
+
+plot(dt_roc)
+
+```
+
+```{r}
+# Ensemble: Random Forest
+
+set.seed(100)
+
+rf <- train(card ~ age + income + expenditure + months + active, data = training, method = 'rf', ntree = 100, maxdepth = 10, parms = list(split = 'information'))
+rf
+
+test_pred <- predict(rf, newdata = testing)
+confusionMatrix(test_pred, as.factor(testing$card), mode = 'everything')
+
+testing %>% group_by(card) %>% count()
+
+test_pred_prob <- predict(rf, newdata = testing, type = 'prob')
+
+rf_roc <- roc(testing$card, test_pred_prob$yes)
+
+rf_roc
+
+plot(rf_roc)
+
+```
+
+```{r}
+# SVM model with Linear Kernel
+
+set.seed(100)
+
+train <- createDataPartition(y = df$card, p=0.7, list = FALSE)
+
+training <- df[train,]
+
+testing <- df[-train,]
+
+svm <- train(card ~ age + income + expenditure + months + active, data = training, method = 'svmLinear', prob.model = TRUE)
+svm
+
+test_pred <- predict(svm, newdata = testing)
+confusionMatrix(test_pred, as.factor(testing$card), mode = 'everything')
+
+testing %>% group_by(card) %>% count()
+
+# get ROC curve 
+
+test_pred_prob <- predict(svm, newdata = testing, type = 'prob')
+
+svm_roc <- roc(testing$card, test_pred_prob$yes)
+
+svm_roc
+
+plot(svm_roc)
+
+```
+
+```{r}
+# SVM model with Non-Linear (RBF) Kernel
+
+set.seed(100)
+
+svm_rbf <- train(card ~ age + income + expenditure + months + active, data = training, method = 'svmRadial', prob.model = TRUE)
+svm_rbf
+
+test_pred <- predict(svm_rbf, newdata = testing)
+confusionMatrix(test_pred, as.factor(testing$card), mode = 'everything')
+
+testing %>% group_by(card) %>% count()
+
+test_pred_prob <- predict(svm_rbf, newdata = testing, type = 'prob')
+
+svm_rbf_roc <- roc(testing$card, test_pred_prob$yes)
+
+svm_rbf_roc
+
+plot(svm_rbf_roc)
+
+```
+
+
+```{r}
+# Generalized Linear Model 
+
+set.seed(100)
+
+train <- createDataPartition(y = df$card, p=0.7, list = FALSE)
+
+training <- df[train,]
+
+testing <- df[-train,]
+
+glm <- train(card ~ age + income + expenditure + months + active, data = training, method = 'glm')
+glm
+
+test_pred <- predict(glm, newdata = testing)
+confusionMatrix(test_pred, as.factor(testing$card), mode = 'everything')
+
+testing %>% group_by(card) %>% count()
+
+test_pred_prob <- predict(glm, newdata = testing, type = 'prob')
+
+glm_roc <- roc(testing$card, test_pred_prob$yes)
+
+glm_roc
+
+plot(glm_roc)
+
+```
+
+```{r}
+# Ensemble: Stochastic Gradient Boosting
+
+set.seed(100)
+
+train <- createDataPartition(y = df$card, p=0.7, list = FALSE)
+
+training <- df[train,]
+
+testing <- df[-train,]
+
+gbm <- train(card ~ age + income + expenditure + months + active, data = training, method = 'gbm')
+gbm
+
+test_pred <- predict(gbm, newdata = testing)
+confusionMatrix(test_pred, as.factor(testing$card), mode = 'everything')
+
+testing %>% group_by(card) %>% count()
+
+test_pred_prob <- predict(gbm, newdata = testing, type = 'prob')
+
+gbm_roc <- roc(testing$card, test_pred_prob$yes)
+
+gbm_roc
+
+plot(gbm_roc)
+
+```
+
+
+```{r}
+# Ensemble: Boosted Logistic Regression
+
+set.seed(100)
+
+train <- createDataPartition(y = df$card, p=0.7, list = FALSE)
+
+training <- df[train,]
+
+testing <- df[-train,]
+
+logit_boost <- train(card ~ age + income + expenditure + months + active, data = training, method = 'LogitBoost', prob.model = TRUE)
+logit_boost
+
+test_pred <- predict(logit_boost, newdata = testing)
+confusionMatrix(test_pred, as.factor(testing$card), mode = 'everything')
+
+testing %>% group_by(card) %>% count()
+
+test_pred_prob <- predict(logit_boost, newdata = testing, type = 'prob')
+
+logit_boost_roc <- roc(testing$card, test_pred_prob$yes)
+
+logit_boost_roc
+
+plot(logit_boost_roc)
+
+```
+
+
+```{r}
+# Ensemble: Boosted Generalized Linear Model 
+
+set.seed(100)
+
+train <- createDataPartition(y = df$card, p=0.7, list = FALSE)
+
+training <- df[train,]
+
+testing <- df[-train,]
+
+boosted_glm <- train(card ~ age + income + expenditure + months + active, data = training, method = 'glmboost')
+boosted_glm
+
+test_pred <- predict(boosted_glm, newdata = testing)
+confusionMatrix(test_pred, as.factor(testing$card), mode = 'everything')
+
+testing %>% group_by(card) %>% count()
+
+test_pred_prob <- predict(boosted_glm, newdata = testing, type = 'prob')
+
+boosted_glm_roc <- roc(testing$card, test_pred_prob$yes)
+
+boosted_glm_roc
+    
+plot(boosted_glm_roc)
+
+```
+

@@ -1,0 +1,222 @@
+---
+title: "Data Wrangling in R (tibble, readr)"
+output: html_notebook
+---
+
+```{r}
+# install package if needed 
+# install.packages('ggplot2')
+# install.packages('tidyverse')
+# install.packages('hms')
+```
+
+```{r}
+# Import libraries
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+library(hms)
+
+```
+
+```{r}
+# tibble: another type data table in R 
+
+# Numbers are displayed with three significant figures by default
+# printing: Only prints what fits on one screen
+# subsetting: Tibbles are quite strict about subsetting. [ always returns another tibble. Contrast this with a data frame: sometimes [ returns a data frame and sometimes it just returns a vector:
+
+# Create a tibble by column
+tibble(x = 1:3, y = c('row1', 'row2', 'row3'))
+
+# Create a tibble by row
+tribble(~x, ~y, 1, 'row1', 2, 'row2', 3, 'row3')
+
+# Create a tibble from dataframe
+iris_tibble <- as_tibble(iris)
+head(iris_tibble)
+
+# Check if we have a tibble
+is_tibble(iris_tibble)
+
+data <- read.csv('Superstore.csv')
+
+data
+
+df2 <- tibble(data)
+df2
+
+```
+
+```{r}
+# Reshape data with gather() (wide to long)
+# gather(data, key = "key", value = "value", ... ,)
+# gather() moves column names into a key column, gathering the column values into a single value column
+# data: The dataset to be modified
+# key: the name of the new variable name
+# value: the name of the new result variable
+# na.rm: whether missing values are removed
+# convert: convert anything that seems like it should be in another format to that other format, e.g. numeric to numeric
+
+# import data hospital.csv on Canvas
+df2 <- read_csv('hospital.csv')
+head(df2)
+
+# year, value: names of new variables 
+# FY1993:FY1998: columns whose values will be combined into 1 column 'year'. Fill in that column with 'value'
+# df2 (38 rows), df3 (6 years x 38 = 228 rows)
+df3 <- gather(df2, year, value, FY1993:FY1998)
+df3
+
+# Field: split Field apart (into PatientDays and Separations)
+# value: used to populate columns PatientDays and Separations
+df4 <- spread(df3, Field, value)
+df4
+
+```
+
+```{r}
+# Missing values
+
+# Drop rows containing NA’s in … columns
+drop_na(df4)
+
+# fill down/up can be used for time data (e.g. house prices over time, stock prices over time)
+
+# Fill in NA’s in columns with most recent non-NA values (fill down)
+
+head(fill(df4, PatientDays, .direction = 'down'), 20)
+
+# Fill in NA’s in columns with most recent non-NA values (fill up)
+
+fill(df4, PatientDays, .direction = 'up')
+
+head(fill(df4, PatientDays, .direction = 'up'), 20)
+
+# Fill in NA's with 0
+head(replace_na(df4, list(Separations = 0)), 10)
+
+```
+
+```{r}
+# readr
+
+# delim = delimiter = separator of data values (records) 
+# e.g. 'a,b,c \n 1,2,3 \n 4,5,NA': delimiter = ','
+
+# read comma separated (csv) files 
+write_file(x = 'a,b,c\n1,2,3\n4,5,NA', path = 'file.csv') 
+read_csv('file.csv')
+
+# read semi-colon separated files 
+write_file(x = 'a;b;c\n1;2;3\n4;5;6', path = 'file.csv') 
+read_csv2('file.csv')
+
+# read files with any delimiter (e.g. pipe). A delimiter separates the values of individual cells
+write_file(x = 'a|b|c \n 1|2|3 \n 4|5|NA', path = 'file.txt') 
+read_delim('file.txt', delim = "|") # for files with special separators, use read_delim and specify the delimiter '|'
+
+# read tab (\t) delimited files
+write_file(x = 'a\tb\tc\n1\t2\t3\n4\t5\tNA', path = 'file.tsv')
+read_tsv('file.tsv')
+
+# read files without header
+write_file('a,b,c\n1,2,3\n4,5,NA', 'file.csv')
+read_csv('file.csv', col_names = FALSE)
+
+# read files with specified header
+read_csv('file.csv', col_names = c('a','b','c'))
+
+# skip lines in file 
+read_csv('file.csv', skip = 1)
+
+# read in maximum number of lines 
+read_csv('file.csv', n_max = 1)
+
+
+```
+
+```{r}
+# write to file 
+out <- tibble(x = 1:3, y = c('row1', 'row2', 'row3'))
+out
+
+# write to comma separated file 
+write_csv(out, 'out1.csv')
+
+# write to file with any delimiter
+write_delim(out, 'out2.csv', delim='|')
+write_delim(out, 'out3.csv', delim='\t')
+write_delim(out, 'out4.csv', delim=';')
+
+```
+
+
+```{r}
+# parse_*() for converting strings into particular data types 
+# R guesses data types when reading files using function parse_*()
+# parse_logical(): parse logicals
+# parse_integer(): parse integers
+# parse_double(): strict numeric parser
+# parse_number(): flexible numeric parser
+# parse_character(): parse characters
+
+x <- read_csv('file.csv')
+
+parse_logical(c("TRUE", "FALSE", "NA"))
+
+parse_integer(c("1", "2", "3"))
+
+# if parsing fails, you’ll get a warning
+parse_integer(c("123", "345", "abc", "123.45"))
+
+parse_double("1.23") 
+
+# specify location of decimals 
+parse_double("1,23", locale = locale(decimal_mark = ","))
+
+parse_number("$100")
+
+parse_number("20%")
+
+parse_number("It cost $123.45")
+
+parse_number("123.456.789", locale = locale(grouping_mark = "."))
+
+str1 <- 'El Ni\xf1o was particularly bad this year'
+
+parse_character(str1)
+
+# if speical characters are used, need to specify the encoding
+# default encoding is UTF-8
+parse_character(str1, locale = locale(encoding = "Latin1"))
+
+# create factors (values for categorical variables)
+parse_factor(c("apple", "banana", "bananana"))
+
+# can use built-in categorical variables (e.g. fruit)
+parse_factor(c("apple", "banana", "bananana"), levels = fruit)
+
+# can specify categorical variables 
+x <- c("cat", "dog", "caw")
+levels <- c("cat", "dog", "cow")
+
+# factor() converts unknown levels to NA
+parse_factor(x, levels)
+
+# parse_datetime() expects an ISO8601 date-time (year, month, day, hour, minute, second)
+parse_datetime('2010-10-01T2010')
+
+# parse_date() expects a four-digit year, a - or /, the month, a - or /, then the day
+parse_date('2010-10-01')
+parse_date(c("2010-01-01", "1979-10-14"))
+
+# parse_time() expects the hour, :, minutes, optionally : and seconds, and an optional a.m./p.m. specifier:
+parse_time("01:10 am")
+
+parse_time("20:10:01")
+
+```
+
+
+

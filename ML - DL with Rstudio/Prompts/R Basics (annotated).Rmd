@@ -1,0 +1,301 @@
+---
+title: "R Basics"
+output: html_notebook
+---
+
+```{r}
+# install package ggplot2 if needed 
+# install.packages('ggplot2')
+
+# short-cut to run a block: ctrl + shft + enter
+# short-cut to run a line: ctrl + enter
+# short-cut to create a block for coding: ctrl + alt + I
+# move up/down blocks: ctrl + PgUp/PgDn
+# short-cut to comment code is ctrl + shft + c
+
+```
+
+
+```{r}
+# import library and built-in datasets 
+
+library(ggplot2)
+
+data(mtcars)
+data(diamonds)
+
+```
+
+```{r}
+mtcars # type the name of the data to see the data
+
+diamonds
+
+```
+
+```{r}
+# Get a summary of data (variables in the dataframe)
+str(mtcars)
+
+str(diamonds)
+
+```
+
+```{r}
+# Create Vectors
+
+# <- is the same as =
+# short-cut to type <- is "alt" + "-"
+
+# Join elements into a vector (3 numbers, 3, 5 ,7)
+x1 <- c(3,5,7) 
+x1 # print data
+
+# Create an integer sequence (colon)
+x2 <- 3:8 # in R, the indexes are inclusive
+x2 # print data
+
+# Create a complex sequence (set intervals 'by')
+x3 <- seq(3, 8, by=0.5)
+x3 # print data
+
+# Repeat a vector (3 times)
+x4 <- rep(3:4, times=3)
+x4
+
+# Repeat elements of a vector
+x5 <- rep(3:4, each=3)
+x5
+
+```
+
+```{r}
+# Vector Functions
+
+y <- rep(3:4, each=3)
+y
+
+# Return x sorted
+sort(y)
+
+# Return x reversed
+rev(y)
+
+# See counts of values
+table(y)
+
+# See unique values
+unique(y)
+
+```
+
+```{r}
+# Select Vector Elements by Position
+# Unlike in Python, R objects are indexed starting at 1
+
+x2 <- 3:8
+x2
+
+# Select 3rd element (element at index 3) 
+x2[3]
+
+# Select all but the 3rd
+x2[-3]
+
+# Select elements 3 to 5 (inclusive)
+x2[3:5]
+
+# Select all elements except 3 to 5
+x2[-(3:5)]
+
+# Select elements 1 to 4
+x2[c(1:4)]
+
+# Select Vector Elements by Value
+
+# Select elements equal to 5
+x2[x2==5]
+
+# Select all elements greater than 5
+x2[x2>5]
+
+# Select elements in the set 3, 5, 7
+x2[x2 %in% c(3, 5, 7)]
+
+```
+
+```{r}
+# Logical Statements:
+
+# Are equal: a == b
+# Not equal: a != b
+# Greater than: a > b
+# Less than: a < b
+# Greater than or equal to: a >= b
+# Less than or equal to: a <= b
+# Is missing: is.na(a)
+# Is null: is.null(a)
+
+a <- 5
+b <- 10
+c <- 10
+
+a == b
+
+b == c
+
+a > b
+
+is.na(a)
+
+```
+
+```{r}
+# Math Functions:
+
+# Natural log: log(x)
+# Exponential: exp(x)
+# Largest element: max(x)
+# Smallest element: min(x)
+# Round to n decimal places: round(x, n)
+# Round to n significant figures: signif(x, n)
+# Correlation: cor(x, y)
+# Sum: sum(x)
+# Mean: mean(x)
+# Median: median(x)
+# Percentage quantiles: quantile(x)
+# Rank of elements: rank(x)
+# Variance: var(x)
+# Standard deviation: sd(x)
+
+y <- c(1:10)
+y
+
+sum(y)
+
+log(y) # log of each element
+
+mean(y)
+
+max(y)
+
+round(log(y), 3) # e.g. to 3 decimals 
+
+cor(y,log(y))
+
+var(y)
+
+sd(y)
+
+quantile(y)
+
+x <- runif(4) # Generate 4 random numbers using uniform distribution (from 0 to 1)
+
+x
+
+rank(x)
+
+# check R documentation 
+
+```
+
+```{r}
+# Matrices 
+
+# Create a matrix from x
+x <- c(1:20)
+x
+m <- matrix(x, nrow = 5, ncol = 4)
+m
+
+# Select row 2 
+m[2,] 
+
+# Select column 3
+m[,3]
+
+# Select an element
+m[5,3]
+
+# Transpose
+t(m)
+
+```
+
+```{r}
+# Lists 
+
+# A list is a collection of elements which can be of different types
+
+# Create a list which contains 2 vectors (1 with integers and 1 with strings)
+l <- list(x = 5:10, y = c('a', 'b', 'c')) 
+l
+
+# Get the elements in the second list in l 
+l[[2]]
+
+# Get the first list in l 
+l[1]
+
+# Get elements in the list named x in l
+l$x 
+
+# Get the list named y in l 
+l['y']
+
+```
+
+
+
+```{r}
+# Dataframes
+
+# Get a summary of the data (mtcars is a dataframe)
+summary(mtcars)
+
+# Get number of rows in dataframe 
+nrow(mtcars)
+
+# Get number of columns in dataframe 
+ncol(mtcars)
+
+# Get dimension of dataframe 
+dim(mtcars)
+
+# Get variable names 
+colnames(mtcars)
+
+# print first 5 rows of dataframe
+head(mtcars, n=5)
+
+# print last 5 rows of dataframe
+tail(mtcars, n=5)
+
+# Get second column
+mtcars[,2]
+
+# Get second row
+mtcars[2,]
+
+# Get element in row 3, column 3
+mtcars[3,3]
+
+# Get a column by name 
+mtcars$mpg
+
+# Combine dataframes by columns (cbind, horizontally)
+mtcars2 <- mtcars
+
+# Combine dataframes by columns (cbind, horizontally)
+df1 <- cbind(mtcars, mtcars2)
+dim(mtcars)
+dim(mtcars2)
+dim(df1)
+
+# Combine dataframes by rows (rbind, vertically)
+df2 <- rbind(mtcars, mtcars2)
+dim(mtcars)
+dim(mtcars2)
+dim(df2)
+
+```

@@ -1,0 +1,124 @@
+---
+title: "Dates in R (lubridate)"
+output: html_notebook
+---
+
+```{r}
+# install package if needed 
+# install.packages('ggplot2')
+# install.packages('tidyverse')
+# install.packages('dplyr')
+# install.packages('lubridate')
+```
+
+```{r}
+# Import libraries
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+library(lubridate)
+
+```
+
+
+```{r}
+# Creating Date/Times
+
+today()
+
+now()
+
+ymd('2017-01-31')
+ymd(20170131)
+mdy('January 31st, 2017')
+dmy('31-Jan-2017')
+ymd_hms('2017-01-31 20:11:59')
+mdy_hm('01/31/2017 08:01')
+
+as_datetime(today())
+as_date(now())
+
+```
+
+```{r}
+# Getting Components
+
+datetime <- ymd_hms('2016-07-08 12:34:56')
+
+year(datetime)
+month(datetime)
+mday(datetime)
+
+yday(datetime)
+wday(datetime)
+
+month(datetime, label = TRUE)
+month(datetime, label = FALSE)
+month(datetime, label = TRUE, abbr = TRUE)
+month(datetime, label = TRUE, abbr = FALSE)
+
+wday(datetime, label = TRUE)
+wday(datetime, label = FALSE)
+wday(datetime, label = TRUE, abbr = TRUE)
+wday(datetime, label = TRUE, abbr = FALSE)
+
+```
+
+```{r}
+# Setting Components
+
+datetime <- ymd_hms('2016-07-08 12:34:56')
+datetime
+
+year(datetime) <- 2020 
+datetime
+
+month(datetime) <- 01 
+datetime
+
+hour(datetime) <- hour(datetime) + 1 
+datetime
+
+update(datetime, year = 2020, month = 2, mday = 2, hour = 2)
+
+```
+
+
+```{r}
+# Time Spans
+dseconds(15)
+dminutes(10)
+dhours(c(12, 24))
+ddays(0:5)
+dweeks(3)
+dyears(1)
+
+age <- today() - ymd(19800101)
+age
+as.duration(age)
+
+2 * dyears(1)
+dyears(1) + dweeks(12) + dhours(15)
+
+tomorrow <- today() + ddays(1)
+tomorrow
+last_year <- today() - dyears(1)
+last_year
+
+```
+
+
+```{r}
+# Periods:  
+one_pm <- ymd_hms("2016-03-12 13:00:00", tz = "America/New_York")
+one_pm
+one_pm + days(1)
+
+10 * (months(6) + days(1))
+days(50) + hours(25) + minutes(2)
+
+
+```
+
+
+

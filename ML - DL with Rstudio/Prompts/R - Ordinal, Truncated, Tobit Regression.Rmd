@@ -1,0 +1,89 @@
+---
+title: "R - Ordinal, Truncated, Tobit Regression"
+output: html_notebook
+---
+
+```{r}
+# install package if needed 
+# install.packages('MASS')
+# install.packages('ggplot2')
+# install.packages('truncreg')
+# install.packages('AER')
+```
+
+```{r}
+# Import libraries
+library(MASS)
+library(ggplot2)
+library(truncreg)
+library(AER)
+
+```
+
+
+```{r}
+# Ordinal Logistic Regression
+
+df <- read.csv(file = 'world_values.csv')
+df
+
+ggplot(df, aes(x=as.factor(poverty))) + geom_bar() + xlab("Poverty Level") + ylab("Count")
+
+
+```
+
+```{r}
+
+df$poverty  <-  factor(df$poverty, levels=c('Too Little', 'About Right', 'Too Much'), ordered=TRUE)
+
+ord_reg <- polr(poverty ~ religion + degree + country + age + gender, data=df, Hess=TRUE)
+summary(ord_reg)
+
+results <- coef(summary(ord_reg))
+p_values <- pnorm(abs(results[, "t value"]), lower.tail = FALSE)* 2
+results <- cbind(results, "p value" = round(p_values, 3))
+results
+
+new_data <- data.frame('religion'= 'no', 'degree'='yes','country'='Sweden','age'=33,'gender'='male')
+
+round(predict(ord_reg, new_data, type = 'p'), 3)
+
+```
+
+```{r}
+# Truncated regression
+
+df2 <- read.csv(file = 'scores.csv')
+
+ggplot(df2, aes(score)) + geom_histogram(binwidth=3)
+
+
+```
+
+```{r}
+
+truncated_reg <- truncreg(score ~ langscore + prog, data = df2, point = 100, direction = 'right')
+summary(truncated_reg)
+
+truncated_reg2 <- truncreg(score ~ langscore + prog, data = df2, point = 60, direction = 'left')
+summary(truncated_reg2)
+
+
+```
+
+```{r}
+# Tobit Regression
+
+data('Affairs')
+
+tobit_reg1 <- tobit(affairs ~ age + yearsmarried + religiousness + occupation + rating,
+  left = 0, right = 4, data = Affairs)
+summary(tobit_reg1)
+
+tobit_reg2 <- tobit(affairs ~ age + yearsmarried + religiousness + occupation + rating,
+  left = 0, data = Affairs)
+summary(tobit_reg2)
+
+```
+
+

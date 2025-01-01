@@ -1,0 +1,93 @@
+---
+title: "R - Survival Analysis"
+output: html_notebook
+---
+
+```{r}
+# install package if needed 
+# install.packages('survival')
+# install.packages('survminer')
+# install.packages('dplyr')
+# install.packages('tidyverse')
+# install.packages('ggplot2')
+```
+
+```{r}
+# Import libraries
+library(survival)
+library(survminer)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+
+```
+
+```{r}
+# Import data
+df <- read.csv('lung_disease.csv')
+
+# The data should be sorted by time (ascending)
+df
+
+# Variables:
+
+# inst: Institution code
+# time: Period (Survival time in days since beginning of study)
+# status: censoring status 1=censored, 2=dead
+# age: Age in years
+# sex: Male=1 Female=2
+# ph.ecog: ECOG performance score (0=good 5=dead)
+# ph.karno: Karnofsky performance score as rated by physician
+# pat.karno: Karnofsky performance score as rated by patient
+# meal.cal: Calories consumed at meals
+# wt.loss: Weight loss in last six months
+
+
+```
+
+```{r}
+# Survival Curve (Kaplan-Meier)
+
+fit <- survfit(Surv(time, status) ~ sex, data = df)
+print(fit)
+
+# Set plot size
+options(repr.plot.width=6, repr.plot.height=4)
+
+# Plot survival curves, show confidence intervals and p-value comparing 2 curves 
+ggsurvplot(fit, pval = TRUE, conf.int = TRUE,
+          linetype = 'strata',
+          surv.median.line = 'hv', 
+          fun = 'pct', 
+          ggtheme = theme_bw())
+
+
+# Plot cumulative events over time
+ggsurvplot(fit, conf.int = TRUE, ggtheme = theme_bw(), fun = 'event')
+
+
+```
+```{r}
+# PLot hazard function over time 
+ggsurvplot(fit, conf.int = TRUE, ggtheme = theme_bw(), fun = 'cumhaz')
+
+```
+
+
+```{r}
+# Log-rank test
+surv_diff <- survdiff(Surv(time, status) ~ sex, data = lung, rho = 0)
+surv_diff
+
+```
+
+```{r}
+# Cox regression 
+
+
+cox_reg <- coxph(Surv(time, status) ~ age + sex + ph.ecog, data =  lung)
+summary(cox_reg)
+
+```
+
+

@@ -1,0 +1,54 @@
+---
+title: "Network Analysis"
+output: html_notebook
+---
+
+```{r}
+# install package if needed 
+# install.packages('igraph')
+# install.packages('ggplot2')
+```
+
+```{r}
+# Import libraries
+library(igraph)
+library(ggplot2)
+
+```
+
+```{r}
+
+nodes=cbind('id'=c('SF','LA','SEA','NY','CHI','HOU','MIA','BOS'))
+nodes
+
+links=cbind('from'=c('SF',rep('LA',3),rep('SEA',2),'HOU','NY'),
+            'to'=c('MIA','NY','CHI','HOU','MIA','BOS',rep('SF',2)),
+            'weight'=rep(1,8))
+links
+
+net = graph_from_data_frame(links,vertices = nodes,directed = T)
+plot(net)
+
+
+```
+
+```{r}
+degree_g <- igraph::degree(net)
+
+degree_g <- data.frame(city=names(degree_g), value=degree_g, row.names=NULL)
+
+betweenness_g <- igraph::betweenness(net)
+betweenness_g <- data.frame(city=names(betweenness_g), value=betweenness_g, row.names=NULL)
+
+closeness_g <- igraph::closeness(net)
+closeness_g <- data.frame(city=names(closeness_g), value=closeness_g, row.names=NULL)
+
+ggplot(data=degree_g, aes(x=reorder(city, -value), y=value)) + geom_bar(stat="identity") + xlab('City') + ylab('Degree Centrality')
+
+ggplot(data=betweenness_g, aes(x=reorder(city, -value), y=value)) + geom_bar(stat="identity") + xlab('City') + ylab('Betweenness Centrality') 
+
+ggplot(data=closeness_g, aes(x=reorder(city, -value), y=value)) + geom_bar(stat="identity") + xlab('City') + ylab('Closeness Centrality') 
+
+
+```
+

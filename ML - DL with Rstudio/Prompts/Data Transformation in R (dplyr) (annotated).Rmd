@@ -1,0 +1,215 @@
+---
+title: "Data Transformation in R (dplyr)"
+output: html_notebook
+---
+ 
+```{r}
+# install package if needed 
+# install.packages('ggplot2')
+# install.packages('tidyverse')
+# install.packages('dplyr')
+```
+
+```{r}
+# Load R packages
+library(ggplot2)
+library(tidyverse)
+library(dplyr) # data processing 
+
+```
+
+```{r}
+# Load built-in dataset mpg into the environment
+data(mpg)
+
+```
+
+```{r}
+# Basic functions 
+
+# look at data 
+head(mpg)
+
+# see a dense summary of data
+glimpse(mpg)
+
+```
+
+```{r}
+# Pipe ' %>% ': a short-handed way to write functions; # passes the variable on the left as the first parameter of the function on the right
+
+# no pipe
+group_by(mpg, class) # group data mpg by var class
+
+# with pipe (mpg is the first input var of the function following): same as group_by(mpg, class)
+# shortcut for pipe: ctl + shft + M 
+mpg %>% group_by(class) 
+
+```
+
+```{r}
+# Combine vectors into data frame using the data_frame() function
+
+x = c(135,251,61,16,11)
+x
+
+y = c(532,15,1,661,1)
+y
+
+data_frame(x = c(135,251,61,16,11), y = c(532,15,1,661,1))
+
+```
+
+```{r}
+# Sort rows by values of a column (ascending)
+# mpg is the input data; year is the var to sort by 
+arrange(mpg, year)
+
+# Sort rows by values of a column (descending)
+arrange(mpg, desc(year))
+
+
+```
+```{r}
+# Rename a column (cyl to cylinder)
+df <- mpg
+df
+rename(df, cylinder=cyl)
+rename(df, drive=drv)
+
+```
+
+```{r}
+# Filter by row 
+
+mpg
+
+# mpg is the input dataframe. Extract rows that meet the condition (displ>3)
+filter(mpg, mpg$displ>3)
+
+filter(mpg, mpg$manufacturer == 'audi')
+
+# Extract rows that meet the multiple conditions, sort by displ (descending)
+# OR
+# pipe takes the filtered df as input to the arrange() function
+filter(mpg, mpg$displ>5 | mpg$displ<3) %>% arrange(desc(displ))
+
+# AND
+filter(mpg, mpg$displ<5 & mpg$displ>3) %>% arrange(desc(displ))
+
+# Without the pipe, the code needs the functions embedded insides one another
+arrange(filter(mpg, mpg$displ<5 & mpg$displ>3), desc(displ))
+
+```
+
+
+```{r}
+# Filter by column
+
+mpg
+
+# Select columns whose name contains a string
+select(mpg, contains('model'))
+
+# Select columns whose name starts with a string
+head(select(mpg, starts_with('d')))
+
+# Select columns whose name ends with a string
+head(select(mpg, ends_with('l')))
+
+```
+
+```{r}
+# Remove duplicate rows
+distinct(mpg)
+
+```
+
+```{r}
+# Select rows by position e.g row 20 to 25 (inclusive)
+slice(mpg, 20:25)
+
+```
+
+```{r}
+# Data Summary
+# Summarize data/variable with a function
+# Functions: first, last, nth, n, n_distinct, min, max, mean, median, var, sd, IQR, etc
+
+# Find mean of cyl
+summarise(mpg, value = mean(mpg$cyl))
+
+# Find IQR of cyl
+summarise(mpg, value = IQR(mpg$cyl))
+
+# Find nth value of cyl in a vector
+mpg$cyl
+summarise(mpg, value = nth(mpg$cyl, 5))
+
+# Find nth value of cyl in a vector e.g. 4th from end
+mpg$cyl
+summarise(mpg, value = nth(mpg$cyl, -4))
+
+# Find # of unique values of cyl in a vector
+distinct(mpg, mpg$cyl)
+summarise(mpg, value = n_distinct(mpg$cyl))
+
+
+```
+
+```{r}
+# Group data
+
+# Group data into rows by class (group mpg data by class) 
+group_by(mpg, class)
+
+# Group by class and apply a calculation for each variable where applicable (group mpg data by class, calculate mean of var) 
+summarise_all(group_by(mpg, class), funs(mean(.,na.rm=TRUE)))
+
+# Group by class and apply a calculation for a particular variable where applicable (group mpg data by class, calculate mean of 'displ' var) 
+summarise_at(group_by(mpg, class), vars(displ), funs(mean(.,na.rm=TRUE)))
+
+```
+
+```{r}
+# Create new variables 
+
+# Calculate and append one or more new columns (e.g. average of cyl and displ)
+head(mutate(mpg, new1 = (cyl+displ)/2))
+
+# Calculate one or more new columns. Drop original columns
+head(transmute(mpg, new1 = (cyl+displ)/2))
+
+```
+
+```{r}
+# Combine Dataframes
+
+a <- data_frame(x = c('a','b','c','d'), y = c(11,22,33,44))
+b <- data_frame(x = c('a','b','c','e'), y = c(55,66,77,88))
+
+a 
+b
+
+# Combine vertically
+bind_rows(a, b)
+
+# Combine horizontally
+bind_cols(a, b)
+
+```
+
+
+```{r}
+# 1. Use the built-in mpg data. Extract rows with year between 1999 and 2002 inclusive. Sort by the variable cty (descending). What is the value at index [4, 5]?
+
+mpg
+
+df3 = filter(mpg, mpg$year >= 1999 & mpg$year <= 2002) %>% arrange(desc(cty))
+
+df3[4,5]
+
+# Ans: 4 
+
+```
+

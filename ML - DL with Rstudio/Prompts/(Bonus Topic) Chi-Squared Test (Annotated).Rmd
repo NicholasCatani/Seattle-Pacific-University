@@ -1,0 +1,51 @@
+---
+title: "Chi-Squared Test"
+output: html_notebook
+---
+
+
+```{r}
+# install package if needed 
+# install.packages('ggplot2')
+# install.packages('tidyverse')
+# install.packages('dplyr')
+
+```
+
+```{r}
+# Load R packages
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+
+```
+
+
+```{r}
+# Ex. Conduct chi-squared test to see if there is a statistically significant difference between treatment and cocaine addiction.
+
+# create the table of observed values
+
+# create the data 
+df = data.frame(success = c(14,6,4),
+                failure = c(10,18,20))
+
+# add row labels 
+rownames(df) = c('Desipramine', 'Lithium', 'Placeco')
+
+# create a 2-way freq table (cross-tabulation)
+dt = as.table(as.matrix(df))
+dt
+
+# conduct the chi-sq test 
+chisq = chisq.test(dt)
+chisq
+
+# p-value < 1%, so we reject the null hypothesis and conclude that the treatment does have an effect on treating cocaine addition
+
+chisq$expected 
+chisq$observed 
+chisq$p.value 
+
+
+```

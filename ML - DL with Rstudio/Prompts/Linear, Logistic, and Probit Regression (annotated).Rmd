@@ -1,0 +1,128 @@
+---
+title: "R - Linear, Logistic, and Probit Regression"
+output: html_notebook
+---
+
+```{r}
+# install package if needed 
+# install.packages('ggplot2')
+# install.packages('tidyverse')
+# install.packages('dplyr')
+# install.packages('Metrics')
+```
+
+```{r}
+# Load R packages
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+library(Metrics)
+
+```
+
+```{r}
+# Import the mpg.csv data on Canvas
+# short cut for <- is "ALT" + "-" 
+df1 <- read.csv('mpg.csv')
+head(df1)
+
+```
+
+
+```{r}
+# Estimate linear regression
+
+# Use all x variables (.) except car name; mpg is the y variable
+
+# function: lm(y-var ~ .) (like y = x1 + x2 + ...)
+# '.' -> use all x-var
+# '-' -> use all x-var but some
+
+# y-var: mpg 
+# x-var: all 
+
+# store the model in a variable 'linear_model'
+linear_model <- lm(mpg ~ . - car_name, data=df1)
+
+# print results
+summary(linear_model)
+
+# see error metrics (difference between data and prediction for mpg)
+rmse(df1$mpg, predict(linear_model))
+
+```
+```{r}
+# Use all x variables. Convert variable cylinders into a categorical variable (factor function); mpg is the y variable
+
+# mpg: y-var 
+# drop original cylinders var (- cylinders)
+
+linear_model2 <- lm(mpg ~ . - car_name - cylinders + factor(cylinders), data=df1)
+
+summary(linear_model2)
+
+# see error metrics 
+rmse(df1$mpg, predict(linear_model2))
+
+```
+
+
+```{r}
+# Import the credict card data
+df2 <- read.csv('credit_card.csv')
+head(df2)
+
+```
+
+```{r}
+# Estimate logistic regression
+
+# Use all x variables (.) except ID (-ID)\n", default on payment is the y variable (default.payment.next.month)
+# specify logistic reg: family=binomial(link='logit')
+
+# binomial: 2 outcomes (pay back or not)
+# link: link function 
+
+logit_model <- glm(default.payment.next.month ~ . - ID, family=binomial(link='logit'), data=df2)
+
+summary(logit_model)
+
+```
+```{r}
+# Estimate probit regression
+
+# Use all x variables (.) except ID (-ID)\n",
+
+probit_model <- glm(default.payment.next.month ~ . - ID, family=binomial(link='probit'), data=df2)
+
+summary(probit_model)
+
+```
+
+```{r}
+# 1. Use the mpg.csv data. Run a linear regression. Use mpg as the y-variable. Use the rest as x-variables except cylinders, origin, and car_name. What is the coefficient for horsepower? Round to nearest 3 decimals.
+
+linear_model <- lm(mpg ~ . - cylinders - origin - car_name, data=df1)
+
+summary(linear_model)
+
+# Ans: 0.001
+
+# 2. Use the mpg.csv data. Run a linear regression. Use mpg as the y-variable. Use the rest as x-variables except car_name. Convert cylinders and origin into categorical variables. What is the coefficient for horsepower? Round to nearest 3 decimals.
+
+linear_model2 <- lm(mpg ~ . - car_name - cylinders + factor(cylinders) - origin + factor(origin), data=df1)
+
+summary(linear_model2)
+
+# Ans: -0.035
+
+# 3. Use the credit_card.csv data. Run a logistic regression. Use default on payment as the y variable. Use only limit_bal, marriage, and age as x-variables. What is the coefficient for age? Round to nearest 3 decimals.
+
+logit_model <- glm(default.payment.next.month ~ LIMIT_BAL + MARRIAGE + AGE, family=binomial(link='logit'), data=df2)
+
+summary(logit_model)
+
+# Ans: 0.006
+
+```
+

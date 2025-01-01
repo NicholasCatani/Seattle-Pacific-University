@@ -1,0 +1,109 @@
+---
+title: "Tidy Data and More Data Wrangling in R (tidyr, dplyr)"
+output: html_notebook
+---
+
+```{r}
+# install package if needed 
+# install.packages('ggplot2')
+# install.packages('tidyverse')
+```
+
+```{r}
+# Import libraries
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+
+```
+
+```{r}
+# Review: Ways to reshape a dataframe - gather 
+
+table4a
+table4b
+
+gather(table4a, '1999', '2000', key = 'year', value = 'cases')
+
+gather(table4b, '1999', '2000', key = 'year', value = 'population')
+
+```
+
+```{r}
+# Review: Ways to reshape a dataframe - spread (opposite of gather)
+
+table2
+
+
+spread(table2, key = type, value = count)
+
+```
+
+```{r}
+# More ways to reshape a dataframe - seperate 
+
+
+table3
+
+separate(table3, rate, into = c('cases', 'population'))
+
+separate(table3, rate, into = c('cases', 'population'), sep = "/")
+
+separate(table3, year, into = c('century', 'year'), sep = 2)
+
+```
+
+```{r}
+# More ways to reshape a dataframe - unite (inverse of separate)
+
+
+table5
+
+unite(table5, new, century, year)
+
+unite(table5, new, century, year, sep = "")
+
+unite(table5, century, year, sep = "")
+
+
+```
+
+```{r}
+# Choosing rows 
+
+# Review: filter 
+
+df <- spread(table2, key = type, value = count)
+df
+
+filter(df, country == 'Brazil')
+
+# More ways to slice data
+
+sample_frac(df, 0.5, replace = FALSE)
+
+sample_n(df, 2, replace = FALSE)
+
+slice(df, 2:3)
+
+top_n(df, 3)
+
+```
+```{r}
+# Choosing rows based on conditions 
+
+# Review: Choose by column names (e.g. country, year)
+select(df, c('country', 'year'))
+
+# More ways
+select(df, contains('ca'))
+
+select(df, ends_with('s'))
+
+select(df, starts_with('ye'))
+
+select(table4a, num_range('', 1999:2000))
+
+```
+
+

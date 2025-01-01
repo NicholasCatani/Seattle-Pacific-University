@@ -1,0 +1,127 @@
+---
+title: "Clustering"
+output: html_notebook
+---
+
+```{r}
+# Install packages if needed 
+# install.packages('caret')
+# install.packages('dbscan')
+# install.packages('purrr')
+# install.packages('cluster')
+# install.packages('meanShiftR')
+# install.packages('LPCM')
+
+```
+
+```{r}
+# Import libraries
+library(caret)
+library(dbscan)
+library(tidyverse)
+library(cluster)
+library(ggplot2)
+library(meanShiftR)
+library(LPCM)
+
+```
+
+```{r}
+data(iris)
+
+iris
+
+iris <- as.matrix(iris[,1:4])
+
+head(iris)
+```
+
+```{r}
+# K-Means Clustering:
+
+set.seed(100)
+
+sse <- function(k) {kmeans(iris, k, nstart = 10)$tot.withinss}
+
+k.values <- 1:15
+
+all_sses <- map_dbl(k.values, sse)
+
+all_sses
+
+options(repr.plot.width=10, repr.plot.height=5)
+
+plot(k.values, all_sses, type='b', pch = 19, 
+     xlab='Number of clusters K', ylab='Total within-clusters sum of squares')
+
+```
+```{r}
+# Hierarchical Clustering:
+
+set.seed(100)
+
+dissimilarity <- dist(iris, method = 'euclidean')
+
+hc1 <- hclust(dissimilarity, method = 'complete' )
+
+hc1
+
+plot(hc1, cex = 0.6, hang = -1)
+
+rect.hclust(hc1, k = 4, border = 2:5)
+
+dissimilarity <- dist(iris, method = 'euclidean')
+
+hc2 <- hclust(dissimilarity, method = 'ward.D2')
+
+plot(hc2, cex = 0.6, hang = -1)
+rect.hclust(hc2, k = 3, border = 2:5)
+
+```
+
+```{r}
+# DBSCAN:
+
+set.seed(100)
+
+options(repr.plot.width=5, repr.plot.height=5)
+ 
+kNNdistplot(iris, k = 5)
+
+abline(h=0.5, col = 'red', lty=2)
+
+result3 <- dbscan(iris, eps = 0.5, minPts = 5)
+result3
+
+result3$cluster
+
+```
+
+```{r}
+# Mean Shift Clustering 
+
+set.seed(100)
+
+bandwidths = seq(0, 2, by = 0.05)
+
+n_clusters = vector(mode = 'list')
+
+for (i in bandwidths) {
+
+result4 <- meanShift(iris, trainData = iris, kernelType = 'NORMAL', bandwidth = rep(i, NCOL(iris)))
+
+clusters <- n_distinct(result4$assignment)
+
+n_clusters = unlist(c(n_clusters, clusters))
+
+}
+
+
+data = data.frame(bandwidths, n_clusters)
+
+ggplot(data = data, aes(x = bandwidths, y = n_clusters)) + geom_line() + geom_point()
+
+```
+
+
+

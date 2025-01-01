@@ -1,0 +1,166 @@
+---
+title: "Hypothesis Tests and ANOVA"
+output: html_notebook
+---
+
+```{r}
+# install package if needed 
+# install.packages('ggplot2')
+# install.packages('tidyverse')
+```
+
+```{r}
+# Load R packages
+library(ggplot2)
+library(tidyverse)
+
+```
+
+```{r}
+# Load built-in dataset into the environment
+data(midwest)
+```
+
+```{r}
+head(midwest)
+
+```
+
+```{r}
+head(midwest$percollege, 10)
+
+summary(midwest$percollege)
+
+options(repr.plot.width=6, repr.plot.height=3)
+
+ggplot(midwest, aes(percollege)) + geom_histogram()
+
+```
+
+```{r}
+cor(midwest$poptotal, midwest$popdensity)
+
+```
+
+```{r}
+# One sample t-test for difference in means
+
+# Use t.test function
+# Parameters:
+# mu: value to be tested against
+# paired: paired test or not
+# alternative: two.sided, less, or greater
+# conf.level: confidence level
+
+t.test(midwest$percollege, mu = 25, paired = FALSE, alternative = 'two.sided', conf.level = 0.95)
+
+t.test(midwest$percollege, mu = 25, paired = FALSE, alternative = 'less', conf.level = 0.95)
+
+```
+
+```{r}
+# Two sample t-test for difference in means
+# Use t.test function
+# e.g. Test equality of variable y by variable x (group): t.test(y ~ x, data = df)
+
+df <- midwest %>% filter(state == 'WI' | state == 'IL')
+
+ggplot(df, aes(state, percollege)) + geom_boxplot()
+
+t.test(percollege ~ state, data = df, conf.level = 0.95)
+
+
+```
+
+```{r}
+# z-test for difference in proportions
+# Use prop.test function
+# prop.test(x, n, alternative = c('two.sided, 'less, 'greater'), conf.level = 0.95)
+# Parameters:
+# x: a vector of counts of successes
+# n: a vector of counts of trials
+# alternative: two.sided, less, or greater
+# conf.level: confidence level
+
+prop.test(c(40,196),c(400,3270), alternative = 'two.sided', conf.level = 0.95)
+
+
+```
+
+```{r}
+# Paired t-test for difference in means
+# In paired t-test, each subject is tested twice
+# Use t.test function
+# Parameters:
+# mu: value to be tested against
+# paired: set to TRUE
+# alternative: two.sided, less, or greater
+# conf.level: confidence level
+
+# Use the sleep data, where each of the 10 subjects tried 2 types of drugs and the effect (extra) was measured 
+sleep
+
+t.test(extra ~ group, data = sleep, paired = TRUE, alternative = 'two.sided', conf.level = 0.95)
+
+```
+
+
+```{r}
+# One-Way ANOVA
+# Use aov function for both one-way and n-way ANOVA
+# aov(formula = y ~ x, data = df)
+# Parameters:
+# y: dependent variable
+# x: independent variable
+
+results <- aov(formula = mpg ~ cyl, data = mtcars)
+summary(results)
+
+
+```
+
+```{r}
+# N-Way ANOVA: 2 or more variables
+# Use aov function for both one-way and n-way ANOVA
+# aov(formula = y ~ x1 + x2 + ..., data = df)
+# Parameters:
+# y: dependent variable
+# x1, x2,...: independent variables
+
+results2 <- aov(formula = mpg ~ cyl + vs, data = mtcars)
+summary(results2)
+
+
+```
+
+```{r}
+# N-Way ANOVA with Interactions
+# Use aov function for both one-way and n-way ANOVA
+# aov(formula = y ~ x1*x2 + ..., data = df)
+# Parameters:
+# y: dependent variable
+# x1, x2,...: independent variables
+
+results3 <- aov(formula = mpg ~ cyl*vs*am, data = mtcars)
+summary(results3)
+
+```
+
+
+```{r}
+# Exercises: Use the midwest data
+
+
+
+# 1. Which hypothesis test should be used to test for difference in means in popdensity for Michigan and Ohio?
+
+
+# 2. Run this hypothesis test using 90% confidence interval. What is the p-value? 
+
+
+# 3. Can the null hypothesis be rejected at the 90% confidence interval?
+
+
+
+```
+

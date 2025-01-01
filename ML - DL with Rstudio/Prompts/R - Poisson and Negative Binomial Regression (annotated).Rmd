@@ -1,0 +1,109 @@
+---
+title: "R - Poisson and Negative Binomial Regression"
+output: html_notebook
+---
+
+```{r}
+# install package if needed 
+# install.packages('ggplot2')
+# install.packages('tidyverse')
+# install.packages('AER')
+# install.packages('MASS')
+```
+
+```{r}
+# Import libraries
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+library(AER)
+library(MASS)
+
+```
+
+```{r}
+# import data 
+
+# Data: Number of awards won by students in one year based on program (categorical) and math scores (continuous)
+# 
+# num_awards: number of awards won by a student in one year
+# math: score on math final exam
+# prog: 1 = General, 2 = Academic, 3 = Vocational
+
+df <- read.csv('awards.csv')
+
+df
+
+```
+
+```{r}
+# Set plot size
+options(repr.plot.width=6, repr.plot.height=3)
+
+# Look at the distribution of number of awards 
+ggplot(df, aes(num_awards, fill = prog)) + geom_histogram(binwidth=1)
+
+```
+
+```{r}
+# Estimate Poisson regression of number of awards won on program and math 
+# y var: num_awards, x vars: program and math
+
+poisson_model <- glm(num_awards ~ prog + math, family="poisson", data=df)
+
+# print results 
+summary(poisson_model)
+
+
+```
+
+```{r}
+# Predict expected number of awards won by a student given program and math score
+
+# creates data point
+test_data = data.frame(prog = 2, math = 50)
+test_data
+
+# use predict function to model the response (y-var)
+predict(poisson_model, newdata = test_data, type = 'response')
+
+# 0.36 award per year -> 1 award every 3 years
+
+```
+
+```{r}
+# Test for over (under) dispersion (null hypothesis (alpha = 0): no over(under) dispersion
+# alt hypothesis: alpha > 0: Overdispersion)
+
+# poisson_model is the name of the regression you created 
+
+dispersiontest(poisson_model, trafo=1)
+
+# If using 95% confidence level, don't reject the null that alpha = 0 -> use Poisson 
+# If using 90% confidence level, reject the null that alpha = 0 and conclude that alpha < 0 -> use negative binomial 
+
+```
+
+```{r}
+# Estimate Negative Binomial Regression
+
+nb_model <- glm.nb(num_awards ~ prog + math, data = df)
+summary(nb_model)
+
+```
+
+
+
+```{r}
+# Predict expected number of awards won by a student given program and math score
+
+test_data = data.frame(prog = 2, math = 50)
+test_data
+
+predict(nb_model, newdata = test_data, type = 'response')
+
+# 0.35 award per year -> 1 award every 3 years
+
+```
+
+
